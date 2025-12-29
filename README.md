@@ -1,73 +1,73 @@
-# React + TypeScript + Vite
+# RSK Multi-Verify
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Batch smart-contract verification for Rootstock Blockscout.
 
-Currently, two official plugins are available:
+Upload your Hardhat `build-info` artifacts, paste a deployments JSON, generate a verification plan, then verify every contract in one run (submit + poll status) with links to results.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- Upload one or more Hardhat `artifacts/build-info/*.json` files
+- Parse compiled contracts and their fully qualified names (`path/to/File.sol:ContractName`)
+- Paste or upload a deployments JSON and generate a verification plan
+- Run verification for each plan item (submit, poll status, show success/failure)
+- Optional Blockscout API key input (kept in memory in the browser)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Quickstart
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open the app and follow the UI:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Upload Hardhat build-info JSON files
+2. Paste or upload a deployments JSON
+3. Click Generate plan
+4. Click Run verification
 
-export default defineConfig([
-  globalIgnores(['dist']),
+## Deployments JSON Format
+
+The app expects JSON that contains contract addresses and (optionally) constructor arguments.
+
+Recommended shape (array of items):
+
+```json
+[
   {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+    "address": "0x0000000000000000000000000000000000000000",
+    "fullyQualifiedName": "contracts/Token.sol:Token",
+    "constructorArgs": ["MyToken", "MTK", 18]
+  }
+]
 ```
+
+Supported fields per item:
+
+- `address` (required): deployed contract address
+- `fullyQualifiedName` (optional): `path/to/File.sol:ContractName` (best matching)
+- `contractName` (optional): falls back to name-only matching
+- `constructorArgs` (optional): JSON array of constructor args (encoded client-side)
+- `constructorArgsHex` (optional): pre-encoded constructor args hex (preferred if you already have it)
+
+If both `constructorArgs` and `constructorArgsHex` are present, `constructorArgsHex` wins.
+
+## Verification API
+
+This app uses the Blockscout API endpoints exposed by Rootstock explorers:
+
+- Submit: `GET/POST /api?module=contract&action=verifysourcecode` with `codeformat=solidity-standard-json-input`
+- Poll: `GET /api?module=contract&action=checkverifystatus&guid=...`
+
+Network base URLs:
+
+- Rootstock Mainnet: https://rootstock.blockscout.com
+- Rootstock Testnet: https://rootstock-testnet.blockscout.com
+
+## Scripts
+
+- `npm run dev`: start the dev server
+- `npm run build`: typecheck + production build
+- `npm run lint`: run ESLint
+- `npm run preview`: preview production build locally
+
