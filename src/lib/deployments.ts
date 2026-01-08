@@ -1,8 +1,5 @@
+import { isRecord } from './utils'
 import type { DeploymentSpec } from './types'
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
-}
 
 function normalizeAddress(address: string): string {
   const trimmed = address.trim()

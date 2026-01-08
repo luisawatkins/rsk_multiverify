@@ -1,13 +1,10 @@
+import { isRecord } from './utils'
 import type { BuildInfoJson, ContractArtifact } from './types'
 
 type HardhatOutputContracts = Record<
   string,
   Record<string, { abi?: unknown }>
 >
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
-}
 
 function normalizeCompilerVersion(version: unknown): string {
   if (typeof version !== 'string') return ''

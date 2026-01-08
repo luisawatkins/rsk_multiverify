@@ -1,11 +1,25 @@
 export type Network = 'rskMainnet' | 'rskTestnet'
 
+export type StandardJsonInput = {
+  language: string
+  sources: Record<string, { content: string }>
+  settings?: Record<string, unknown>
+  [key: string]: unknown
+}
+
+export type StandardJsonOutput = {
+  contracts: Record<string, Record<string, unknown>>
+  sources?: Record<string, unknown>
+  errors?: unknown[]
+  [key: string]: unknown
+}
+
 export type BuildInfoJson = {
   id?: string
   solcVersion?: string
   solcLongVersion?: string
-  input: unknown
-  output: unknown
+  input: StandardJsonInput
+  output: StandardJsonOutput
 }
 
 export type ContractArtifact = {

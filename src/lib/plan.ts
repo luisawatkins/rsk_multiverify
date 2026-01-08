@@ -1,9 +1,6 @@
 import { encodeConstructorArgsHex } from './abi'
+import { isRecord } from './utils'
 import type { ContractArtifact, DeploymentSpec, VerificationPlanItem } from './types'
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
-}
 
 function normalizeHex(hex: string): string {
   const trimmed = hex.trim()
@@ -35,7 +32,14 @@ export function buildVerificationPlan(
 
     if (!artifact && dep.contractName) {
       const candidates = byName.get(dep.contractName) ?? []
-      artifact = candidates.length === 1 ? candidates[0] : candidates[0]
+      if (candidates.length > 1) {
+        throw new Error(
+          `Ambiguous contract name: ${dep.contractName}. Found multiple artifacts: ${candidates
+            .map((c) => c.fullyQualifiedName)
+            .join(', ')}. Please use fullyQualifiedName in deployment spec.`,
+        )
+      }
+      artifact = candidates[0]
     }
 
     if (!artifact) continue
